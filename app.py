@@ -10,6 +10,13 @@ st.subheader("🧠 오늘 한줄 인사이트")
 total = df["mention"].sum()
 top_keyword = df.sort_values("mention", ascending=False).iloc[0]["keyword"]
 
+st.subheader("📰 오늘 주요 뉴스")
+
+latest_news = df.sort_values("date", ascending=False).head(10)
+
+for i, row in latest_news.iterrows():
+    st.markdown(f"- [{row['title']}]({row['link']})")
+
 st.write(f"오늘 총 언급량 {total}건, '{top_keyword}' 중심으로 화제 형성")
 
 st.subheader("🔥 오늘 언급량")
