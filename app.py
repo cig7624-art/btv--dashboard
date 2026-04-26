@@ -1,54 +1,92 @@
 import streamlit as st
 import pandas as pd
 
-st.title("📊 B tv+ 시장 반응 대시보드")
+st.set_page_config(page_title="B tv+ 콘텐츠 시장 대시보드", layout="wide")
+
+st.title("📊 B tv+ 콘텐츠 시장 대시보드")
 
 df = pd.read_csv("data.csv")
 
-st.subheader("🧠 오늘 한줄 인사이트")
+if "category" not in df.columns:
+    df["category"] = "ETC"
 
-total = df["mention"].sum()
-top_keyword = df.sort_values("mention", ascending=False).iloc[0]["keyword"]
+df["mention"] = pd.to_numeric(df["mention"], errors="coerce").fillna(1)
 
-st.subheader("📰 오늘 주요 뉴스")
+today_total = int(df["mention"].sum())
+top_keyword = df.groupby("keyword")["mention"].sum().sort_values(ascending=False).index[0]
 
-latest_news = df.sort_values("date", ascending=False).head(8)
+btv_count = int(df[df["category"] == "B tv+"]["mention"].sum())
+ott_count = int(df[df["category"] == "OTT_TOP"]["mention"].sum())
+
+st.subheader("🧠 오늘의 한 줄 인사이트")
+st.info(f"오늘 수집된 콘텐츠 시장 신호는 총 {today_total}건이며, 현재는 '{top_keyword}' 관련 언급이 가장 두드러집니다.")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric("B tv+ 관련 신호", f"{btv_count}건")
+
+with col2:
+    st.metric("OTT 화제 콘텐츠 신호", f"{ott_count}건")
+
+with col3:
+    st.metric("오늘 핵심 키워드", top_keyword)
+
+st.divider()
+
+st.subheader("📰 오늘의 주요뉴스 TOP 3")
+latest_news = df.sort_values("date", ascending=False).head(3)
 
 for i, row in latest_news.iterrows():
     st.markdown(f"""
-    <div style="padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:8px;">
+    <div style="padding:14px; border:1px solid #ddd; border-radius:12px; margin-bottom:10px;">
         <b>{row['title']}</b><br>
         <span style="color:gray;">{row['keyword']} · {row['platform']}</span><br>
         <a href="{row['link']}" target="_blank">기사 보기</a>
     </div>
     """, unsafe_allow_html=True)
 
-st.subheader("📺 B tv+ 관련 뉴스")
+st.subheader("📺 B tv+ 관련뉴스 TOP 3")
+btv_news = df[df["category"] == "B tv+"].sort_values("date", ascending=False).head(3)
 
-btv = df[df["keyword"].str.contains("B tv|비플", case=False)]
+for i, row in btv_news.iterrows():
+    st.markdown(f"""
+    <div style="padding:14px; border:1px solid #ddd; border-radius:12px; margin-bottom:10px;">
+        <b>{row['title']}</b><br>
+        <span style="color:gray;">{row['keyword']} · {row['platform']}</span><br>
+        <a href="{row['link']}" target="_blank">기사 보기</a>
+    </div>
+    """, unsafe_allow_html=True)
 
-for i, row in btv.head(10).iterrows():
+st.divider()
+
+st.subheader("🎬 오늘 OTT 화제 콘텐츠 TOP 10")
+ott = df[df["category"] == "OTT_TOP"]
+
+if len(ott) > 0:
+    ott_top = ott.groupby("keyword")["mention"].sum().sort_values(ascending=False).head(10)
+    st.bar_chart(ott_top)
+else:
+    st.write("아직 OTT 화제 콘텐츠 데이터가 없습니다.")
+
+st.subheader("🆕 이번주 신작 레이더")
+new_release = df[df["category"] == "NEW_RELEASE"].sort_values("date", ascending=False).head(8)
+
+for i, row in new_release.iterrows():
     st.markdown(f"- [{row['title']}]({row['link']})")
 
-st.write(f"오늘 총 언급량 {total}건, '{top_keyword}' 중심으로 화제 형성")
+st.subheader("💡 B tv+ 편성 기회 신호")
+genre = df[df["category"] == "GENRE_SIGNAL"]
 
-st.subheader("🔥 오늘 언급량")
-st.write(df.groupby("keyword")["mention"].sum())
+if len(genre) > 0:
+    top_genre = genre.groupby("keyword")["mention"].sum().sort_values(ascending=False).head(5)
+    for keyword, count in top_genre.items():
+        st.write(f"• **{keyword}** 관련 신호 {int(count)}건 → 특집관/큐레이션 후보")
+else:
+    st.write("아직 편성 기회 신호가 없습니다.")
 
-st.subheader("📈 플랫폼별 언급량")
-st.bar_chart(df.groupby("platform")["mention"].sum())
+st.divider()
 
-st.subheader("💬 감성 비율")
-st.write(df["sentiment"].value_counts())
-
-st.subheader("🎬 OTT 화제 콘텐츠 TOP")
-
-top_contents = df.sort_values("mention", ascending=False).head(5)
-
-for i, row in top_contents.iterrows():
-    st.write(f"{row['keyword']} - {row['mention']}건")
-
-st.subheader("⚡ 오늘 핫 키워드")
-
-hot = df.sort_values("mention", ascending=False).head(3)
-st.write(hot["keyword"].tolist())
+st.subheader("⚡ 급등 키워드")
+hot = df.groupby("keyword")["mention"].sum().sort_values(ascending=False).head(5)
+st.write(list(hot.index))
