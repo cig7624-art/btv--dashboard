@@ -1,0 +1,6 @@
+date,keyword,platform,mention,sentiment
+2026-04-25,B tv+,전체,120,positive
+2026-04-25,비플,전체,80,neutral
+2026-04-25,Moving,Disney+,200,positive
+2026-04-25,The Glory,Netflix,150,positive
+2026-04-25,가격,B tv+,60,negative
