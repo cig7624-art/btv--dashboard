@@ -3,7 +3,14 @@ import pandas as pd
 from datetime import datetime
 from urllib.parse import quote
 
-keywords = ["B tv+", "비플", "B tv 플러스", "B tv plus", "B tv+ max"]
+keywords = [
+    "B tv+", "비플", "B tv 플러스", "B tv plus", "B tv+ max",
+    "넷플릭스 신작", "넷플릭스 인기작",
+    "티빙 신작", "티빙 인기작",
+    "디즈니플러스 신작", "디즈니플러스 인기작",
+    "쿠팡플레이 신작", "쿠팡플레이 인기작",
+    "OTT 화제작", "OTT 신작"
+]
 
 rows = []
 
