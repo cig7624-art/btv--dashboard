@@ -12,10 +12,16 @@ top_keyword = df.sort_values("mention", ascending=False).iloc[0]["keyword"]
 
 st.subheader("📰 오늘 주요 뉴스")
 
-latest_news = df.sort_values("date", ascending=False).head(10)
+latest_news = df.sort_values("date", ascending=False).head(8)
 
 for i, row in latest_news.iterrows():
-    st.markdown(f"- [{row['title']}]({row['link']})")
+    st.markdown(f"""
+    <div style="padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:8px;">
+        <b>{row['title']}</b><br>
+        <span style="color:gray;">{row['keyword']} · {row['platform']}</span><br>
+        <a href="{row['link']}" target="_blank">기사 보기</a>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.subheader("📺 B tv+ 관련 뉴스")
 
