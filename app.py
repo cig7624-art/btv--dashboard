@@ -17,6 +17,13 @@ latest_news = df.sort_values("date", ascending=False).head(10)
 for i, row in latest_news.iterrows():
     st.markdown(f"- [{row['title']}]({row['link']})")
 
+st.subheader("📺 B tv+ 관련 뉴스")
+
+btv = df[df["keyword"].str.contains("B tv|비플", case=False)]
+
+for i, row in btv.head(10).iterrows():
+    st.markdown(f"- [{row['title']}]({row['link']})")
+
 st.write(f"오늘 총 언급량 {total}건, '{top_keyword}' 중심으로 화제 형성")
 
 st.subheader("🔥 오늘 언급량")
